@@ -1,8 +1,24 @@
 import * as React from 'react'
 import screenfull from 'screenfull'
 
-function requestFullscreen(elevent?: Element | Event): Promise<void> {
+function requestFullscreen(
+  elevent?: Element | Event | React.MouseEvent,
+): Promise<void> {
   if (screenfull.isEnabled) {
+    if (screenfull.isFullscreen) {
+      if (elevent && 'target' in elevent && elevent.target instanceof Element) {
+        const element =
+          elevent instanceof Element
+            ? elevent
+            : 'target' in elevent && elevent.target instanceof Element
+            ? elevent.target
+            : null
+
+        if (element === screenfull.element) {
+          screenfull.exit()
+        }
+      }
+    }
     if (!elevent) {
       return screenfull.request()
     } else if (elevent instanceof Element) {
@@ -18,7 +34,9 @@ function requestFullscreen(elevent?: Element | Event): Promise<void> {
 
 type UseScreenfull = {
   isFullscreen: boolean
-  requestFullscreen: (element?: Element | Event) => Promise<void>
+  requestFullscreen: (
+    element?: Element | Event | React.MouseEvent,
+  ) => Promise<void>
   toggle: () => Promise<void>
 }
 
