@@ -1,6 +1,6 @@
 {
   "name": "use-screenfull",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "React hook for screenfull.js",
   "author": "albinekb",
   "license": "MIT",
