@@ -1,7 +1,28 @@
 import * as React from 'react'
 import screenfull from 'screenfull'
 
-export const useScreenfull = () => {
+function requestFullscreen(elevent?: Element | Event): Promise<void> {
+  if (screenfull.isEnabled) {
+    if (!elevent) {
+      return screenfull.request()
+    } else if (elevent instanceof Element) {
+      return screenfull.request(elevent)
+    } else if ('target' in elevent && elevent.target instanceof Element) {
+      return screenfull.request(elevent.target)
+    } else {
+      return screenfull.request()
+    }
+  }
+  return Promise.resolve()
+}
+
+type UseScreenfull = {
+  isFullscreen: boolean
+  requestFullscreen: (element?: Element | Event) => Promise<void>
+  toggle: () => Promise<void>
+}
+
+function useScreenfull(): UseScreenfull {
   const [isFullscreen, setIsFullscreen] = React.useState(
     screenfull.isEnabled && screenfull.isFullscreen,
   )
@@ -15,6 +36,17 @@ export const useScreenfull = () => {
     }
   }, [])
 
+  const toggle = React.useMemo(
+    () => () => {
+      if (screenfull.isEnabled) {
+        return screenfull.toggle()
+      }
+
+      return Promise.resolve()
+    },
+    [],
+  )
+
   React.useEffect(() => {
     if (screenfull.isEnabled) {
       screenfull.on('change', handler)
@@ -24,5 +56,22 @@ export const useScreenfull = () => {
     }
   }, [])
 
-  return { isFullscreen }
+  return { isFullscreen, requestFullscreen, toggle }
 }
+
+function useScreenfullError() {
+  const [error, setError] = React.useState<Event | null>(null)
+
+  React.useEffect(() => {
+    if (screenfull.isEnabled) {
+      screenfull.on('error', setError)
+    }
+    return () => {
+      if (screenfull.isEnabled) screenfull.off('error', setError)
+    }
+  }, [])
+
+  return error
+}
+
+export { useScreenfull, useScreenfullError }
