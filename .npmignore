@@ -1,0 +1,8 @@
+example/
+src/
+.editorconfig
+.prettierrc
+.travis.yml
+rollup.config.js
+tsconfig.json
+tsconfig.test.json
